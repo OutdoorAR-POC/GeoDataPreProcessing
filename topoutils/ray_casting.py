@@ -98,9 +98,15 @@ class Triangle:
 
         return u, v, w
 
-    def does_ray_intersect(self, point, ray_vector):
-        interection_point = vector_plane_intersection(self.x, self.normal, point, ray_vector)
-        if interection_point is None:  # the ray does not intersect the plane
-            return False
+    def does_ray_intersect(self, point, ray_vector) -> tuple[bool, float | None]:
+        """This function returns squared distance between the given point and the intersection point of the ray vector
+        with the triangle. Square root is taken later, for comparison squared distance is fine, since square function
+        preserves monotonicity. """
+        intersection_point = vector_plane_intersection(self.x, self.normal, point, ray_vector)
+        if intersection_point is None:  # the ray does not intersect the plane
+            return False, None
         u, v, w = self.barycentric_coordinates(point)
-        return u >= 0 and v >= 0 and w >= 0
+        if u >= 0 and v >= 0 and w >= 0:
+            connector = intersection_point - point
+            return True, sum([vi**2 for vi in connector])
+        return False, None
