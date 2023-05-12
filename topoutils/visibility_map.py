@@ -15,14 +15,14 @@ def get_spherical_coordinates(n: int) -> tuple:
     return u, v
 
 
-def get_cartesian_coordinates_from_spherical(u, v, r=1) -> tuple:
+def get_cartesian_coordinates_from_spherical(u, v, r=1) -> np.ndarray:
     x = r * np.outer(np.cos(u), np.sin(v))
     y = r * np.outer(np.sin(u), np.sin(v))
     z = r * np.outer(np.ones(np.size(u)), np.cos(v))
-    return x, y, z
+    return np.dstack((x, y, z))
 
 
-def get_cartesian_coordinates(n: int) -> tuple:
+def get_cartesian_coordinates(n: int) -> np.ndarray:
     return get_cartesian_coordinates_from_spherical(*get_spherical_coordinates(n))
 
 
@@ -72,4 +72,5 @@ if __name__ == '__main__':
     N = 8
     # plot_sampling_scheme(N)
     # plot_sampling_grid(N)
-    X, Y, Z = get_cartesian_coordinates(N)
+    visibility_map_vectors = get_cartesian_coordinates(N)
+    print(visibility_map_vectors.shape)
