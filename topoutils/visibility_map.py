@@ -6,6 +6,8 @@ obj_file_path = Path(__file__).parents[1].joinpath("models", "cube.obj")
 
 
 def get_spherical_coordinates(n: int) -> tuple:
+    if n <= 0:
+        raise ValueError("Number of spherical coordinates must be positive")
     u_offset = 2 * np.pi / (2 * n)
     v_offset = np.pi / (2 * n)
     u = np.linspace(u_offset, 2 * np.pi - u_offset, n)
@@ -18,6 +20,10 @@ def get_cartesian_coordinates_from_spherical(u, v, r=1) -> tuple:
     y = r * np.outer(np.sin(u), np.sin(v))
     z = r * np.outer(np.ones(np.size(u)), np.cos(v))
     return x, y, z
+
+
+def get_cartesian_coordinates(n: int) -> tuple:
+    return get_cartesian_coordinates_from_spherical(*get_spherical_coordinates(n))
 
 
 def plot_sampling_scheme(n: int) -> None:
@@ -63,7 +69,7 @@ def plot_sampling_grid(n: int) -> None:
 
 
 if __name__ == '__main__':
-    n = 8
-    plot_sampling_scheme(n)
-    plot_sampling_grid(n)
-    # print(get_visibility_coordinates(n))
+    N = 8
+    # plot_sampling_scheme(N)
+    # plot_sampling_grid(N)
+    X, Y, Z = get_cartesian_coordinates(N)
