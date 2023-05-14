@@ -117,10 +117,20 @@ class TestRayCasting(TestCase):
         self.assertTrue(intersects)
         self.assertEqual(178, distance)
         self.assertFalse(triangle.does_ray_intersect(p0, np.array([0, 0, 1]))[0])
+        self.assertFalse(triangle.does_ray_intersect(p0, np.array([0, 1, 0]))[0])
+        self.assertFalse(triangle.does_ray_intersect(p0, np.array([0, -1, 0]))[0])
 
     def test_triangle_do_multiple_rays_intersect(self):
-        # TODO for a matrix
-        pass
+        p0 = np.array([5, 3, 6])
+        triangle = ray_casting.Triangle(self.X, self.Y, self.Z)
+
+        intersects, distance = triangle.does_ray_intersect(
+            p0, np.array([[[0, 0, -1], [0, 0, 1]], [[0, -1, 0], [0, 1, 0]]])
+        )
+        expected_intersections = np.array([[True, False], [False, False]])
+        np.testing.assert_array_equal(expected_intersections, intersects)
+        expected_distances = np.array([[178, np.inf], [np.inf, np.inf]])
+        np.testing.assert_array_equal(expected_distances, distance)
 
     def test_vector_plane_intersection_for_multiple_points(self):
         direction_vectors = sphere_sampling.get_cartesian_coordinates(3)
