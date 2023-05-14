@@ -33,7 +33,5 @@ class TestVisibilityMap(TestCase):
         for face in self.geometry.faces:
             triangle = Triangle(*[self.geometry.vertices[vertex_idx] for vertex_idx in face])
             for point_idx, point in enumerate(self.points):
-                for vector_idx, direction_vector in enumerate(self.direction_vectors):
-                    intersects, distance = triangle.does_ray_intersect(point, direction_vector)
-                    if intersects:  # only relevant if intersects
-                        visibility_maps[point_idx]  # TODO
+                intersects, distance = triangle.does_ray_intersect(point, self.direction_vectors)
+                visibility_maps[point_idx] = np.min((visibility_maps[point_idx], distance))

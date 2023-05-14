@@ -10,7 +10,7 @@ def normal_of_a_triangle(x, y, z):
     return np.cross(y - x, z - x)
 
 
-def vector_plane_intersection(x, n, p0, v):
+def vector_plane_intersection(x, n, p0, v) -> tuple[np.ndarray, np.ndarray]:
     """
 
     :param x: point on a plane
@@ -22,18 +22,21 @@ def vector_plane_intersection(x, n, p0, v):
 
     x = np.array(x)
     n = np.array(n)
-    p0 = np.array(p0)
-    v = np.array(v)
 
-    denom = np.dot(v, n)
-    if np.abs(denom) < 0.000001:
-        return None  # ray parallel to the plane
+    t = np.dot(x - p0, n) / np.dot(v, n)
 
-    t = np.dot(x - p0, n) / denom
-    if t < 0:
-        return None  # the other side of the plane
+    has_intersection = t >= 0
 
-    return t * v
+    if isinstance(t, np.ndarray):
+        if len(t.shape) == 1:  # vector
+            t = t.reshape((len(t), 1))
+        elif len(t.shape) == 2:  # matrix
+            v_shape = v.shape
+            t = t.reshape((t.shape[0] * t.shape[1], 1))
+            v = v.reshape((v.shape[0] * v.shape[1], v.shape[2]))
+            return np.multiply(t, v).reshape(v_shape), has_intersection
+
+    return np.multiply(t, v), has_intersection
 
 
 def barycentric_coordinates(x, y, z, p):
@@ -88,8 +91,8 @@ class Triangle:
         yp = p - self.y
 
         # Calculate the dot products
-        dot02 = np.dot(self.yx, yp)
-        dot12 = np.dot(self.yz, yp)
+        dot02 = np.dot(yp, self.yx)
+        dot12 = np.dot(yp, self.yz)
 
         # Calculate the barycentric coordinates
         u = (self.dot11 * dot02 - self.dot01 * dot12) / self.barycentric_denom
@@ -98,15 +101,19 @@ class Triangle:
 
         return u, v, w
 
-    def does_ray_intersect(self, point, ray_vector) -> tuple[bool, float | None]:
+    def does_ray_intersect(self, point, ray_vector) -> tuple[bool, float | None | np.ndarray]:
         """This function returns squared distance between the given point and the intersection point of the ray vector
         with the triangle. Square root is taken later, for comparison squared distance is fine, since square function
         preserves monotonicity. """
-        intersection_point = vector_plane_intersection(self.x, self.normal, point, ray_vector)
-        if intersection_point is None:  # the ray does not intersect the plane
-            return False, None
-        u, v, w = self.barycentric_coordinates(point)
-        if u >= 0 and v >= 0 and w >= 0:
+        squared_distances = np.ones(ray_vector.shape[:-1]) * np.infty
+        intersection_point, does_intersect_plane = vector_plane_intersection(self.x, self.normal, point, ray_vector)
+        u, v, w = self.barycentric_coordinates(intersection_point)
+        inside_triangle = does_intersect_plane & (u >= 0) & (v >= 0) & (w >= 0)
+        if len(inside_triangle.shape) == 0 and inside_triangle:
             connector = intersection_point - point
-            return True, sum([vi**2 for vi in connector])
-        return False, None
+            squared_distances = sum([vi ** 2 for vi in connector])
+        else:
+            for i, j in zip(*np.where(inside_triangle)):
+                connector = intersection_point[i, j] - point
+                squared_distances[i, j] = sum([vi**2 for vi in connector])
+        return inside_triangle, squared_distances

@@ -23,7 +23,6 @@ def get_cartesian_coordinates_from_spherical(u, v, r=1) -> np.ndarray:
 
 
 def get_cartesian_coordinates(n: int) -> np.ndarray:
-    # TODO: one powinny być macierzą, żeby z lokalizacji współrzędnych było wiadomo gdzie jesteśmy na mapie widoczności
     return get_cartesian_coordinates_from_spherical(*get_spherical_coordinates(n))
 
 
