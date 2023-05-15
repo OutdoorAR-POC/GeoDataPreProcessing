@@ -3,6 +3,7 @@ from unittest import TestCase
 import numpy as np
 
 from topoutils import ray_casting, sphere_sampling
+from topoutils.ray_casting import Triangle
 
 
 class TestRayCasting(TestCase):
@@ -166,3 +167,9 @@ class TestRayCasting(TestCase):
         np.testing.assert_allclose(intersection_point2, intersection_points_first_row[1])
         np.testing.assert_allclose(intersection_point3, intersection_points_first_row[2])
         np.testing.assert_allclose(intersection_points_all_matrix[0], intersection_points_first_row)
+
+    def test_cube(self):
+        triangle = Triangle([0., 0., 0.], [0., 1., 1.], [0., 1., 0.])
+        inside_triangle, squared_distances = triangle.does_ray_intersect(np.array([1, 1, 1]), np.array([-1, 0, 0]))
+        self.assertTrue(inside_triangle)
+        self.assertEqual(1, squared_distances)

@@ -3,6 +3,9 @@ from typing import Sequence
 import numpy as np
 
 
+delta = 0.000001
+
+
 def normal_of_a_triangle(x, y, z):
     x = np.array(x)
     y = np.array(y)
@@ -25,7 +28,7 @@ def vector_plane_intersection(x, n, p0, v) -> tuple[np.ndarray, np.ndarray]:
 
     t = np.dot(x - p0, n) / np.dot(v, n)
 
-    has_intersection = t >= 0
+    has_intersection = t >= -delta
 
     if isinstance(t, np.ndarray):
         if len(t.shape) == 1:  # vector
@@ -110,10 +113,8 @@ class Triangle:
         u, v, w = self.barycentric_coordinates(intersection_point)
         inside_triangle = does_intersect_plane & (u >= 0) & (v >= 0) & (w >= 0)
         if len(inside_triangle.shape) == 0 and inside_triangle:
-            connector = intersection_point - point
-            squared_distances = sum([vi ** 2 for vi in connector])
+            squared_distances = sum([vi ** 2 for vi in intersection_point])
         else:
             for i, j in zip(*np.where(inside_triangle)):
-                connector = intersection_point[i, j] - point
-                squared_distances[i, j] = sum([vi**2 for vi in connector])
+                squared_distances[i, j] = sum([vi**2 for vi in intersection_point[i, j]])
         return inside_triangle, squared_distances
