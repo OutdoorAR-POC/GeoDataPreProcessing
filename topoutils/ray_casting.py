@@ -104,17 +104,56 @@ class Triangle:
 
         return u, v, w
 
-    def does_ray_intersect(self, point, ray_vector) -> tuple[bool, float | None | np.ndarray]:
+    def does_ray_intersect(
+            self,
+            point: np.ndarray,
+            ray_vector: np.ndarray,
+            epsilon: float = 0.0001,
+    ) -> tuple[bool | np.ndarray, float | np.ndarray]:
         """This function returns squared distance between the given point and the intersection point of the ray vector
         with the triangle. Square root is taken later, for comparison squared distance is fine, since square function
         preserves monotonicity. """
         squared_distances = np.ones(ray_vector.shape[:-1]) * np.infty
-        intersection_point, does_intersect_plane = vector_plane_intersection(self.x, self.normal, point, ray_vector)
-        u, v, w = self.barycentric_coordinates(intersection_point)
+        extruded_point = point + epsilon*self.normal
+        intersecting_vector, does_intersect_plane = vector_plane_intersection(
+            self.x, self.normal, extruded_point, ray_vector
+        )
+        u, v, w = self.barycentric_coordinates(extruded_point + intersecting_vector)
         inside_triangle = does_intersect_plane & (u >= 0) & (v >= 0) & (w >= 0)
         if len(inside_triangle.shape) == 0 and inside_triangle:
-            squared_distances = sum([vi ** 2 for vi in intersection_point])
+            squared_distances = sum([vi ** 2 for vi in intersecting_vector])
         else:
             for i, j in zip(*np.where(inside_triangle)):
-                squared_distances[i, j] = sum([vi**2 for vi in intersection_point[i, j]])
+                squared_distances[i, j] = sum([vi**2 for vi in intersecting_vector[i, j]])
         return inside_triangle, squared_distances
+
+    def angle_between(self, ray_vectors) -> float:
+        # not used
+        return np.arccos(self.cosine_of_angle_between(ray_vectors))
+
+    def cosine_of_angle_between(self, ray_vectors) -> float:
+        # not used
+        """This function returns an angle (in radians) between a triangle's normal vector and a provided ray vector. """
+        normal_norm = np.linalg.norm(self.normal)  # should be 1, but you never know
+        # I could also assume the denominator is always one and that both, the rays and the normal, are unit vectors.
+        ray_vectors_dims = ray_vectors.shape
+        match len(ray_vectors_dims):
+            case 1:
+                ray_vectors_norms = np.linalg.norm(ray_vectors)
+                return np.divide(np.dot(ray_vectors, self.normal), np.multiply(ray_vectors_norms, normal_norm))
+            case 2:
+                ray_vectors_norms = np.linalg.norm(ray_vectors, axis=1)
+                return np.divide(np.dot(ray_vectors, self.normal), np.multiply(ray_vectors_norms, normal_norm))
+            case 3:
+                ray_vectors = ray_vectors.reshape(
+                    (ray_vectors_dims[0] * ray_vectors_dims[1], ray_vectors_dims[2]))
+                ray_vectors_norms = np.linalg.norm(ray_vectors, axis=1)
+                return (
+                    np.divide(
+                        np.dot(ray_vectors, self.normal),
+                        np.multiply(ray_vectors_norms, normal_norm)
+                    ).reshape(ray_vectors_dims[0], ray_vectors_dims[1])
+                )
+            case _:
+                raise ValueError(f"Ray vectors should be 1,2 or 3D vectors, but are {len(ray_vectors.shape)}")
+

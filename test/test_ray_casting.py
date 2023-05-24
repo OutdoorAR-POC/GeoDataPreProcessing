@@ -1,8 +1,10 @@
+from pathlib import Path
 from unittest import TestCase
 
 import numpy as np
 
 from topoutils import ray_casting, sphere_sampling
+from topoutils.obj_reader import ObjFileReader
 from topoutils.ray_casting import Triangle
 
 
@@ -116,7 +118,7 @@ class TestRayCasting(TestCase):
 
         intersects, distance = triangle.does_ray_intersect(p0, np.array([0, 0, -1]))
         self.assertTrue(intersects)
-        self.assertEqual(178, distance)
+        self.assertEqual(36, distance)
         self.assertFalse(triangle.does_ray_intersect(p0, np.array([0, 0, 1]))[0])
         self.assertFalse(triangle.does_ray_intersect(p0, np.array([0, 1, 0]))[0])
         self.assertFalse(triangle.does_ray_intersect(p0, np.array([0, -1, 0]))[0])
@@ -130,7 +132,7 @@ class TestRayCasting(TestCase):
         )
         expected_intersections = np.array([[True, False], [False, False]])
         np.testing.assert_array_equal(expected_intersections, intersects)
-        expected_distances = np.array([[178, np.inf], [np.inf, np.inf]])
+        expected_distances = np.array([[36, np.inf], [np.inf, np.inf]])
         np.testing.assert_array_equal(expected_distances, distance)
 
     def test_vector_plane_intersection_for_multiple_points(self):
@@ -173,3 +175,25 @@ class TestRayCasting(TestCase):
         inside_triangle, squared_distances = triangle.does_ray_intersect(np.array([1, 1, 1]), np.array([-1, 0, 0]))
         self.assertTrue(inside_triangle)
         self.assertEqual(1, squared_distances)
+
+    def test_cube2(self):
+        point = np.array([1/2, 0, 1/2])
+
+        file_path = Path(__file__).resolve().parents[1].joinpath('models', 'cube.obj')
+        geometry = ObjFileReader(file_path).geometry
+
+        N = 4
+        direction_vectors = sphere_sampling.get_cartesian_coordinates(N)
+
+        triangle = Triangle(*[geometry.vertices[vertex_idx] for vertex_idx in geometry.faces[-1]])
+        inside_triangle, squared_distances = triangle.does_ray_intersect(point, direction_vectors)
+        self.assertEqual(0, np.sum(inside_triangle))
+        self.assertTrue(np.all(np.isinf(squared_distances.ravel())))
+
+        triangle = Triangle(*[geometry.vertices[vertex_idx] for vertex_idx in geometry.faces[9]])
+        inside_triangle, squared_distances = triangle.does_ray_intersect(point, direction_vectors)
+        self.assertEqual(4, np.sum(inside_triangle))
+        self.assertEqual(12, np.sum(np.isinf(squared_distances.ravel())))
+
+
+        

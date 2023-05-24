@@ -7,8 +7,8 @@ import numpy as np
 
 class Geometry:
     def __init__(self, name: str, vertices: list, faces: list) -> None:
-        self._vertices = vertices
-        self._faces = faces
+        self._vertices = np.array(vertices)
+        self._faces = np.array(faces)
         self._name = name or ''
 
     @property
@@ -16,11 +16,11 @@ class Geometry:
         return self._name
 
     @property
-    def vertices(self) -> list:
+    def vertices(self) -> np.array:
         return self._vertices
 
     @property
-    def faces(self) -> list:
+    def faces(self) -> np.array:
         return self._faces
 
 

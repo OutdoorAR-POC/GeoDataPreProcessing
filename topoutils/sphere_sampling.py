@@ -32,9 +32,12 @@ def plot_sampling_scheme(n: int) -> None:
 
     # Make points data
     u, v = get_spherical_coordinates(n)
-    x, y, z = get_cartesian_coordinates_from_spherical(u, v, 1)
+    coords = get_cartesian_coordinates_from_spherical(u, v, 1)
+    x = coords[:, :, 0]
+    y = coords[:, :, 1]
+    z = coords[:, :, 2]
 
-    ax.plot_surface(x, y, z, color='gainsboro', alpha=1.0)
+    ax.plot_surface(x, y, z , color='gainsboro', alpha=1.0)
     ax.scatter(x, y, z, marker='o')
 
     # Set an equal aspect ratio
@@ -66,3 +69,8 @@ def plot_sampling_grid(n: int) -> None:
     for vv in v:
         plt.plot([0, 2*np.pi], [vv+v[0], vv+v[0]], color='gainsboro')
     plt.savefig('sampling_grid.png', bbox_inches='tight')
+
+
+if __name__ == '__main__':
+    plot_sampling_grid(8)
+    plot_sampling_scheme(8)
