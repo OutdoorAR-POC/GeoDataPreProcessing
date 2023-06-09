@@ -1,0 +1,25 @@
+ply
+format ascii 1.0
+element vertex 5
+property float x
+property float y
+property float z
+property uchar red
+property uchar green
+property uchar blue
+element edge 4
+property int vertex1
+property int vertex2
+property uchar red
+property uchar green
+property uchar blue
+end_header
+-6.572080254555E-01 1.240900039673E+00 2.931509971619E+00 255 255 255
+-6.939949989319E-01 1.198469996452E+00 3.038789987564E+00 255 255 255
+-6.402289867401E-01 1.131819963455E+00 2.981800079346E+00 255 255 255
+-5.913980007172E-01 1.158139944077E+00 2.861429929733E+00 255 255 255
+-6.572080254555E-01 1.240900039673E+00 2.931509971619E+00 255 255 255
+0 1 0 170 255
+1 2 0 170 255
+2 3 0 170 255
+3 4 0 170 255

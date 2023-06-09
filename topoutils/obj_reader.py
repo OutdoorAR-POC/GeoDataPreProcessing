@@ -2,26 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import numpy as np
-
-
-class Geometry:
-    def __init__(self, name: str, vertices: list, faces: list) -> None:
-        self._vertices = np.array(vertices)
-        self._faces = np.array(faces)
-        self._name = name or ''
-
-    @property
-    def name(self) -> str | None:
-        return self._name
-
-    @property
-    def vertices(self) -> np.array:
-        return self._vertices
-
-    @property
-    def faces(self) -> np.array:
-        return self._faces
+from topoutils.constants import PROJECT_DIR
+from topoutils.geometry import Geometry
 
 
 class ObjFileReader:
@@ -56,5 +38,7 @@ class ObjFileReader:
 
 
 if __name__ == '__main__':
-    file_path = Path(__file__).parents[1].joinpath('models', 'cube.obj')
+    file_path = PROJECT_DIR.joinpath('models', 'cube.obj')
     geometry = ObjFileReader(file_path).geometry
+    print(geometry.vertices)
+    print(geometry.faces)
