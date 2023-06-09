@@ -11,9 +11,9 @@ class PlyFileReader:
         self._vertex_properties = []
         self._vertex_types = []
         self._vertices = []
-        self._face_properties = []
-        self._face_types = []
-        self._faces = []
+        self._edge_properties = []
+        self._edge_types = []
+        self._edges = []
         self._vertex_properties_processing = False
         self._face_properties_processing = False
         self._num_vertices = 0
@@ -25,14 +25,14 @@ class PlyFileReader:
                     self.parse_header(line)
                 elif len(self._vertices) < self._num_vertices:
                     self.parse_vertex(line)
-                elif len(self._faces) < self._num_faces:
-                    self.parse_face(line)
+                elif len(self._edges) < self._num_faces:
+                    self.parse_edge(line)
                 else:
                     raise ValueError(f"Unexpected line {line}")
 
     @property
-    def faces(self):
-        return self._faces
+    def edges(self):
+        return self._edges
 
     @property
     def vertices(self):
@@ -68,8 +68,8 @@ class PlyFileReader:
                     self._vertex_types.append(self._get_python_type(tokens[1]))
                     self._vertex_properties.append(tokens[2])
                 elif self._face_properties_processing:
-                    self._face_types.append(self._get_python_type(tokens[1]))
-                    self._face_properties.append(tokens[2])
+                    self._edge_types.append(self._get_python_type(tokens[1]))
+                    self._edge_properties.append(tokens[2])
             case 'end_header':
                 self._vertex_properties_processing = False
                 self._face_properties_processing = False
@@ -80,12 +80,12 @@ class PlyFileReader:
     @classmethod
     def _get_python_type(cls, ply_type: str) -> Callable:
         match ply_type:
-            case 'uchar' | 'int':
+            case 'uchar' | 'char' | 'ushort' | 'short' | 'uint' | 'int':
                 return int
-            case 'float':
+            case 'float' | 'double':
                 return float
             case _:
-                raise ValueError('Unexpected type')
+                raise ValueError('Unknown type')
 
     def parse_vertex(self, line: str | None) -> None:
         tokens = line.rstrip('\n').split()
@@ -101,17 +101,17 @@ class PlyFileReader:
             )
         )
 
-    def parse_face(self, line: str | None) -> None:
+    def parse_edge(self, line: str | None) -> None:
         # self._faces.append([int(token.split('/')[0])-1 for token in tokens[1:]])
         tokens = line.rstrip('\n').split()
         if len(tokens) == 0:
             return  # empty line, perhaps?
 
-        self._faces.append(
+        self._edges.append(
             dict(
                 zip(
-                    self._face_properties,
-                    [func(x) for x, func in zip(tokens, self._face_types)]
+                    self._edge_properties,
+                    [func(x) for x, func in zip(tokens, self._edge_types)]
                 )
             )
         )
@@ -119,15 +119,16 @@ class PlyFileReader:
     @property
     def geometry(self) -> Geometry:
         vertices = [[x['x'], x['y'], x['z']] for x in self._vertices]
-        faces = [[x['vertex1'], x['vertex2']] for x in self._faces]
-        return Geometry(self._name, vertices, faces)
+        edges = [[x['vertex1'], x['vertex2']] for x in self._edges]
+        return Geometry(self._name, vertices, edges=edges)
 
 
 if __name__ == '__main__':
     file_path = PROJECT_DIR.joinpath('annotations', 'BluePolyline.ply')
     reader = PlyFileReader(file_path)
     print(reader.vertices)
-    print(reader.faces)
+    print(reader.edges)
     geometry = reader.geometry
     print(geometry.vertices)
-    print(geometry.faces)
+    print(geometry.edges)
+    print(geometry.faces)  # should be empty

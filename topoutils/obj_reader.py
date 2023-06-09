@@ -34,11 +34,12 @@ class ObjFileReader:
 
     @property
     def geometry(self) -> Geometry:
-        return Geometry(self._name, self._vertices, self._faces)
+        return Geometry(self._name, self._vertices, faces=self._faces)
 
 
 if __name__ == '__main__':
     file_path = PROJECT_DIR.joinpath('models', 'cube.obj')
     geometry = ObjFileReader(file_path).geometry
     print(geometry.vertices)
+    print(geometry.edges)  # should be empty
     print(geometry.faces)
