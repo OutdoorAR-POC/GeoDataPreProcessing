@@ -10,7 +10,7 @@ from topoutils.ply_reader import PlyFileReader
 from topoutils.ray_casting import Triangle
 from topoutils.visibility_writer import Visibility, Vertex, Edge
 
-model_file_path = PROJECT_DIR.joinpath('models', 'mesh.obj')
+model_file_path = PROJECT_DIR.joinpath('models', 'decimatedMesh6_closedHoles.obj')
 model_geometry = ObjFileReader(model_file_path).geometry
 
 N = 8

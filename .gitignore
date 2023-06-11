@@ -1,4 +1,5 @@
 .idea/
 notebook/.ipynb_checkpoints
 /models/mesh.obj
+/models/decimatedMesh6_closedHoles.obj
 /notebook/output/
