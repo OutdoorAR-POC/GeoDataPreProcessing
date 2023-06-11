@@ -1,4 +1,8 @@
 from dataclasses import dataclass, field
+from pathlib import Path
+from typing import List
+import json
+from dacite import from_dict
 
 
 @dataclass
@@ -7,7 +11,7 @@ class Vertex:
     x: float
     y: float
     z: float
-    visibility_grid: list[list[float]] = field(default_factory=list)
+    visibility_grid: List[float] = field(default_factory=list)
 
 
 @dataclass
@@ -19,5 +23,9 @@ class Edge:
 @dataclass
 class Visibility:
     name: str
-    vertices: list[Vertex] = field(default_factory=list)
-    edges: list[Edge] = field(default_factory=list)
+    vertices: List[Vertex] = field(default_factory=list)
+    edges: List[Edge] = field(default_factory=list)
+
+
+def from_json(path_to_file: Path) -> Visibility:
+    return from_dict(data_class=Visibility, data=json.load(path_to_file.open('r')))
