@@ -9,3 +9,4 @@ jupyter-dash
 pandas
 dacite==1.8.1
 tqdm==4.65.0
+ipykernel==6.23.1
