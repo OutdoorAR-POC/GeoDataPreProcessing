@@ -26,7 +26,8 @@ def vector_plane_intersection(x, n, p0, v) -> tuple[np.ndarray, np.ndarray]:
     x = np.array(x)
     n = np.array(n)
 
-    t = np.dot(x - p0, n) / np.dot(v, n)
+    with np.errstate(divide='ignore'):
+        t = np.dot(x - p0, n) / np.dot(v, n)
 
     has_intersection = t >= -delta
 
@@ -37,9 +38,11 @@ def vector_plane_intersection(x, n, p0, v) -> tuple[np.ndarray, np.ndarray]:
             v_shape = v.shape
             t = t.reshape((t.shape[0] * t.shape[1], 1))
             v = v.reshape((v.shape[0] * v.shape[1], v.shape[2]))
-            return np.multiply(t, v).reshape(v_shape), has_intersection
+            with np.errstate(invalid='ignore'):
+                return np.multiply(t, v).reshape(v_shape), has_intersection
 
-    return np.multiply(t, v), has_intersection
+    with np.errstate(invalid='ignore'):
+        return np.multiply(t, v), has_intersection
 
 
 def barycentric_coordinates(x, y, z, p):
@@ -107,16 +110,16 @@ class Triangle:
     def does_ray_intersect(
             self,
             point: np.ndarray,
-            ray_vector: np.ndarray,
+            ray_vectors: np.ndarray,
             epsilon: float = 0.0001,
     ) -> tuple[bool | np.ndarray, float | np.ndarray]:
         """This function returns squared distance between the given point and the intersection point of the ray vector
         with the triangle. Square root is taken later, for comparison squared distance is fine, since square function
         preserves monotonicity. """
-        squared_distances = np.ones(ray_vector.shape[:-1]) * np.infty
+        squared_distances = np.ones(ray_vectors.shape[:-1]) * np.infty
         extruded_point = point + epsilon*self.normal
         intersecting_vector, does_intersect_plane = vector_plane_intersection(
-            self.x, self.normal, extruded_point, ray_vector
+            self.x, self.normal, extruded_point, ray_vectors
         )
         u, v, w = self.barycentric_coordinates(extruded_point + intersecting_vector)
         inside_triangle = does_intersect_plane & (u >= 0) & (v >= 0) & (w >= 0)

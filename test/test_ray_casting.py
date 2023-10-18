@@ -116,19 +116,19 @@ class TestRayCasting(TestCase):
         p0 = np.array([5, 3, 6])
         triangle = ray_casting.Triangle(self.X, self.Y, self.Z)
 
-        intersects, distance = triangle.does_ray_intersect(p0, np.array([0, 0, -1]))
+        intersects, distance = triangle.does_ray_intersect(p0, np.array([[[0, 0, -1]]]), 0)
         self.assertTrue(intersects)
         self.assertEqual(36, distance)
-        self.assertFalse(triangle.does_ray_intersect(p0, np.array([0, 0, 1]))[0])
-        self.assertFalse(triangle.does_ray_intersect(p0, np.array([0, 1, 0]))[0])
-        self.assertFalse(triangle.does_ray_intersect(p0, np.array([0, -1, 0]))[0])
+        self.assertFalse(triangle.does_ray_intersect(p0, np.array([[[0, 0, 1]]]))[0])
+        self.assertFalse(triangle.does_ray_intersect(p0, np.array([[[0, 1, 0]]]), 0)[0])
+        self.assertFalse(triangle.does_ray_intersect(p0, np.array([[[0, -1, 0]]]))[0])
 
     def test_triangle_do_multiple_rays_intersect(self):
         p0 = np.array([5, 3, 6])
         triangle = ray_casting.Triangle(self.X, self.Y, self.Z)
 
         intersects, distance = triangle.does_ray_intersect(
-            p0, np.array([[[0, 0, -1], [0, 0, 1]], [[0, -1, 0], [0, 1, 0]]])
+            p0, np.array([[[0, 0, -1], [0, 0, 1]], [[0, -1, 0], [0, 1, 0]]]), 0
         )
         expected_intersections = np.array([[True, False], [False, False]])
         np.testing.assert_array_equal(expected_intersections, intersects)
@@ -172,9 +172,14 @@ class TestRayCasting(TestCase):
 
     def test_cube(self):
         triangle = Triangle([0., 0., 0.], [0., 1., 1.], [0., 1., 0.])
-        inside_triangle, squared_distances = triangle.does_ray_intersect(np.array([1, 1, 1]), np.array([-1, 0, 0]))
+        delta = 0.000001
+        inside_triangle, squared_distances = triangle.does_ray_intersect(
+            np.array([1, 1, 1]),
+            np.array([-1, 0, 0]),
+            delta,
+        )
         self.assertTrue(inside_triangle)
-        self.assertEqual(1, squared_distances)
+        self.assertAlmostEqual(1, squared_distances, delta=delta * 10)
 
     def test_cube2(self):
         point = np.array([1/2, 0, 1/2])

@@ -16,4 +16,4 @@ class TestObjReader(TestCase):
         self.assertEqual(8, len(geometry.vertices))
         self.assertEqual("cube", geometry.name)
         self.assertEqual(12, len(geometry.faces))
-        self.assertListEqual([4, 6, 7], geometry.faces[6])
+        self.assertListEqual([4, 6, 7], geometry.faces[6].tolist())
