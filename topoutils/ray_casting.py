@@ -123,8 +123,12 @@ class Triangle:
         )
         u, v, w = self.barycentric_coordinates(extruded_point + intersecting_vector)
         inside_triangle = does_intersect_plane & (u >= 0) & (v >= 0) & (w >= 0)
-        if len(inside_triangle.shape) == 0 and inside_triangle:
+        num_dimensions = len(inside_triangle.shape)
+        if num_dimensions == 0 and inside_triangle:
             squared_distances = sum([vi ** 2 for vi in intersecting_vector])
+        elif num_dimensions == 1:
+            for i in np.where(inside_triangle)[0]:
+                squared_distances[i] = sum([vi ** 2 for vi in intersecting_vector[i]])
         else:
             for i, j in zip(*np.where(inside_triangle)):
                 squared_distances[i, j] = sum([vi**2 for vi in intersecting_vector[i, j]])
