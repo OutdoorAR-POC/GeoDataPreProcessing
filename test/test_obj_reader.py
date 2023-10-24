@@ -1,15 +1,14 @@
 from pathlib import Path
 from unittest import TestCase
 
-import numpy as np
-
+from topoutils.constants import MODELS_DIR
 from topoutils.obj_reader import ObjFileReader
 
 
 class TestObjReader(TestCase):
 
     def setUp(self) -> None:
-        self.file_path = Path(__file__).parents[1].joinpath('models', 'cube.obj')
+        self.file_path = MODELS_DIR.joinpath('cube.obj')
 
     def test_obj_file_reader(self) -> None:
         geometry = ObjFileReader(self.file_path).geometry

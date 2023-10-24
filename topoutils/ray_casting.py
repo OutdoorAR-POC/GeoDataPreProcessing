@@ -2,7 +2,6 @@ from typing import Sequence
 
 import numpy as np
 
-
 delta = 0.000001
 
 
@@ -117,7 +116,7 @@ class Triangle:
         with the triangle. Square root is taken later, for comparison squared distance is fine, since square function
         preserves monotonicity. """
         squared_distances = np.ones(ray_vectors.shape[:-1]) * np.infty
-        extruded_point = point + epsilon*self.normal
+        extruded_point = point + epsilon * self.normal
         intersecting_vector, does_intersect_plane = vector_plane_intersection(
             self.x, self.normal, extruded_point, ray_vectors
         )
@@ -131,7 +130,7 @@ class Triangle:
                 squared_distances[i] = sum([vi ** 2 for vi in intersecting_vector[i]])
         else:
             for i, j in zip(*np.where(inside_triangle)):
-                squared_distances[i, j] = sum([vi**2 for vi in intersecting_vector[i, j]])
+                squared_distances[i, j] = sum([vi ** 2 for vi in intersecting_vector[i, j]])
         return inside_triangle, squared_distances
 
     def angle_between(self, ray_vectors) -> float:
@@ -163,4 +162,3 @@ class Triangle:
                 )
             case _:
                 raise ValueError(f"Ray vectors should be 1,2 or 3D vectors, but are {len(ray_vectors.shape)}")
-

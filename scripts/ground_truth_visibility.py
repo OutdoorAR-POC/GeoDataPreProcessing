@@ -4,13 +4,13 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from topoutils.constants import PROJECT_DIR, ASSETS_DIR
+from topoutils.constants import RESOURCES_DIR, MODELS_DIR, CAMERAS_DIR, ANNOTATIONS_DIR
 from topoutils.obj_reader import ObjFileReader
 from topoutils.ply_reader import PlyFileReader
 from topoutils.ray_casting import Triangle
 from topoutils.rendering import get_image_coordinates, is_inside_image
 
-cameras_sfm = ASSETS_DIR.joinpath('cameras', 'cameras.sfm')
+cameras_sfm = CAMERAS_DIR.joinpath('cameras.sfm')
 cameras = json.load(cameras_sfm.open('r'))
 intrinsic = cameras['intrinsics'][0]
 K = np.array([
@@ -25,15 +25,14 @@ views = {view['poseId']: {
     'height': int(view['height'])
 } for view in cameras['views']}
 
-model_file_path = PROJECT_DIR.joinpath('models', 'decimatedMesh_closedHoles.obj')
+model_file_path = MODELS_DIR.joinpath('decimatedMesh_closedHoles.obj')
 model_geometry = ObjFileReader(model_file_path).geometry
 
 # get all annotated points
-annotations_directory_path = PROJECT_DIR.joinpath('annotations')
 annotations = np.empty(shape=[0, 3])
 annotations_info: list[tuple[str, str]] = []
 
-for annotations_file_path in annotations_directory_path.iterdir():
+for annotations_file_path in ANNOTATIONS_DIR.iterdir():
     if annotations_file_path.suffix == '.ply':
         annotations_geometry = PlyFileReader(annotations_file_path).geometry
         annotations = np.concatenate((annotations, annotations_geometry.vertices))
@@ -72,4 +71,4 @@ for pose_obj in tqdm(cameras['poses']):
 
     results_df.loc[img_name] = np.logical_and(z_buffer > distances, annotations_visible).astype(int)
 
-results_df.to_csv(ASSETS_DIR.joinpath("ground_truth.csv"))
+results_df.to_csv(RESOURCES_DIR.joinpath("ground_truth.csv"))

@@ -4,25 +4,23 @@ from dataclasses import asdict
 import numpy as np
 
 from topoutils import sphere_sampling
-from topoutils.constants import PROJECT_DIR
+from topoutils.constants import MODELS_DIR, VISIBILITY_DIR, ANNOTATIONS_DIR
 from topoutils.obj_reader import ObjFileReader
 from topoutils.ply_reader import PlyFileReader
 from topoutils.ray_casting import Triangle
 from topoutils.visibility import Visibility, Vertex, Edge
 
-model_file_path = PROJECT_DIR.joinpath('models', 'decimatedMesh_closedHoles.obj')
+model_file_path = MODELS_DIR.joinpath('decimatedMesh_closedHoles.obj')
 model_geometry = ObjFileReader(model_file_path).geometry
-
-annotations_directory_path = PROJECT_DIR.joinpath('annotations')
 
 n_range = [2, 4, 8, 16, 32]
 for N in n_range:
     direction_vectors = sphere_sampling.get_cartesian_coordinates(N)
 
-    visibility_directory_path = PROJECT_DIR.joinpath('visibility_noextrusion', f'n_{N}')
+    visibility_directory_path = VISIBILITY_DIR.joinpath(f'n_{N}')
     visibility_directory_path.mkdir(exist_ok=True, parents=True)
 
-    for annotations_file_path in annotations_directory_path.iterdir():
+    for annotations_file_path in ANNOTATIONS_DIR.iterdir():
         if annotations_file_path.suffix == '.ply':
             annotations_geometry = PlyFileReader(annotations_file_path).geometry
 

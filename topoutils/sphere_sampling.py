@@ -1,9 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from topoutils.constants import PROJECT_DIR
-
-obj_file_path = PROJECT_DIR.joinpath("models", "cube.obj")
+from topoutils.constants import FIGURES_DIR
 
 
 def get_spherical_coordinates(n: int) -> tuple:
@@ -38,7 +36,7 @@ def plot_sampling_scheme(n: int) -> None:
     y = coords[:, :, 1]
     z = coords[:, :, 2]
 
-    ax.plot_surface(x, y, z , color='gainsboro', alpha=1.0)
+    ax.plot_surface(x, y, z, color='gainsboro', alpha=1.0)
     ax.scatter(x, y, z, marker='o')
 
     # Set an equal aspect ratio
@@ -47,7 +45,7 @@ def plot_sampling_scheme(n: int) -> None:
     ax.set_ylabel('y')
     ax.set_zlabel('z')
     ax.set_title('Directional visibility map of a point as a sphere')
-    plt.savefig(str(PROJECT_DIR.joinpath('figures', 'sampling_scheme.png')), bbox_inches='tight')
+    plt.savefig(str(FIGURES_DIR.joinpath('sampling_scheme.png')), bbox_inches='tight')
 
 
 def plot_sampling_grid(n: int) -> None:
@@ -68,8 +66,8 @@ def plot_sampling_grid(n: int) -> None:
     for uu in u:
         plt.plot([uu + u[0], uu + u[0]], [0, np.pi], color='gainsboro')
     for vv in v:
-        plt.plot([0, 2*np.pi], [vv+v[0], vv+v[0]], color='gainsboro')
-    plt.savefig(str(PROJECT_DIR.joinpath('figures', 'sampling_grid.png')), bbox_inches='tight')
+        plt.plot([0, 2 * np.pi], [vv + v[0], vv + v[0]], color='gainsboro')
+    plt.savefig(str(FIGURES_DIR.joinpath('sampling_grid.png')), bbox_inches='tight')
 
 
 if __name__ == '__main__':

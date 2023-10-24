@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import Callable
 
-from topoutils.constants import PROJECT_DIR
 from topoutils.geometry import Geometry
 
 
@@ -123,14 +122,3 @@ class PlyFileReader:
         vertices = [[x['x'], x['y'], x['z']] for x in self._vertices]
         edges = [[x['vertex1'], x['vertex2']] for x in self._edges]
         return Geometry(self._name, vertices, edges=edges)
-
-
-if __name__ == '__main__':
-    file_path = PROJECT_DIR.joinpath('annotations', 'BluePolyline.ply')
-    reader = PlyFileReader(file_path)
-    print(reader.vertices)
-    print(reader.edges)
-    geometry = reader.geometry
-    print(geometry.vertices)
-    print(geometry.edges)
-    print(geometry.faces)  # should be empty
