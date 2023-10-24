@@ -8,6 +8,7 @@ from topoutils.constants import PROJECT_DIR, ASSETS_DIR
 from topoutils.obj_reader import ObjFileReader
 from topoutils.ply_reader import PlyFileReader
 from topoutils.ray_casting import Triangle
+from topoutils.rendering import get_image_coordinates, is_inside_image
 
 cameras_sfm = ASSETS_DIR.joinpath('cameras', 'cameras.sfm')
 cameras = json.load(cameras_sfm.open('r'))
@@ -24,13 +25,13 @@ views = {view['poseId']: {
     'height': int(view['height'])
 } for view in cameras['views']}
 
-model_file_path = PROJECT_DIR.joinpath('models', 'decimatedMesh6_closedHoles.obj')
+model_file_path = PROJECT_DIR.joinpath('models', 'decimatedMesh_closedHoles.obj')
 model_geometry = ObjFileReader(model_file_path).geometry
 
 # get all annotated points
 annotations_directory_path = PROJECT_DIR.joinpath('annotations')
 annotations = np.empty(shape=[0, 3])
-annotations_info: list[tuple[str, int]] = []
+annotations_info: list[tuple[str, str]] = []
 
 for annotations_file_path in annotations_directory_path.iterdir():
     if annotations_file_path.suffix == '.ply':
@@ -41,14 +42,24 @@ for annotations_file_path in annotations_directory_path.iterdir():
         annotations_info.extend(info)
 
 images_index = [view['imgName'] for view in views.values()]
-results_df = pd.DataFrame(data=None, columns=annotations_info, index=images_index)
+results_df = pd.DataFrame(data=None, columns=pd.MultiIndex.from_tuples(annotations_info), index=images_index)
+results_df.columns.names = ['Polyline', 'VertexIdx']
 
 for pose_obj in tqdm(cameras['poses']):
 
     pose = pose_obj['pose']['transform']
-    img_name = views[pose_obj['poseId']]['imgName']
     camera_location = np.array([float(x) for x in pose["center"]])
-    print(img_name)
+
+    view = views[pose_obj['poseId']]
+    img_name = view['imgName']
+    image_width, image_height = view['width'], view['height']
+
+    R = np.array([float(x) for x in pose["rotation"]]).reshape((3, 3), order='F')
+    T = - np.matmul(R, np.array(camera_location)[:, np.newaxis])
+    M = np.vstack((np.hstack((R, T)), np.array([0, 0, 0, 1])))
+
+    annotations_coordinates = get_image_coordinates(annotations, K, M)
+    annotations_visible = is_inside_image(annotations_coordinates, image_width, image_height)
 
     direction_vectors = np.subtract(annotations, camera_location)
     distances = np.array([sum([vi ** 2 for vi in vector]) for vector in direction_vectors])
@@ -56,9 +67,9 @@ for pose_obj in tqdm(cameras['poses']):
 
     for face in model_geometry.faces:
         triangle = Triangle(*[model_geometry.vertices[vertex_idx] for vertex_idx in face])
-        intersects, distance = triangle.does_ray_intersect(camera_location, direction_vectors)
+        intersects, distance = triangle.does_ray_intersect(camera_location, direction_vectors, 0)
         z_buffer = np.minimum(z_buffer, distance)
 
-    results_df.loc[img_name] = (z_buffer > distances).astype(int)
+    results_df.loc[img_name] = np.logical_and(z_buffer > distances, annotations_visible).astype(int)
 
 results_df.to_csv(ASSETS_DIR.joinpath("ground_truth.csv"))

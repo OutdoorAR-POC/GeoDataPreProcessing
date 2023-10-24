@@ -10,17 +10,17 @@ from topoutils.ply_reader import PlyFileReader
 from topoutils.ray_casting import Triangle
 from topoutils.visibility import Visibility, Vertex, Edge
 
-model_file_path = PROJECT_DIR.joinpath('models', 'decimatedMesh6_closedHoles.obj')
+model_file_path = PROJECT_DIR.joinpath('models', 'decimatedMesh_closedHoles.obj')
 model_geometry = ObjFileReader(model_file_path).geometry
 
 annotations_directory_path = PROJECT_DIR.joinpath('annotations')
 
-n_range = [2, 4, 8, 16]
+n_range = [2, 4, 8, 16, 32]
 for N in n_range:
     direction_vectors = sphere_sampling.get_cartesian_coordinates(N)
 
-    visibility_directory_path = PROJECT_DIR.joinpath('visibility', f'n_{N}')
-    visibility_directory_path.mkdir(exist_ok=True)
+    visibility_directory_path = PROJECT_DIR.joinpath('visibility_noextrusion', f'n_{N}')
+    visibility_directory_path.mkdir(exist_ok=True, parents=True)
 
     for annotations_file_path in annotations_directory_path.iterdir():
         if annotations_file_path.suffix == '.ply':
@@ -36,7 +36,7 @@ for N in n_range:
             for face in model_geometry.faces:
                 triangle = Triangle(*[model_geometry.vertices[vertex_idx] for vertex_idx in face])
                 for point_idx, point in enumerate(points):
-                    intersects, distance = triangle.does_ray_intersect(point, direction_vectors)
+                    intersects, distance = triangle.does_ray_intersect(point, direction_vectors, 0)
                     visibility_maps[point_idx] = np.minimum(visibility_maps[point_idx], distance)
 
             for point_idx, point in enumerate(points):

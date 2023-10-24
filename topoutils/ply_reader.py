@@ -46,6 +46,8 @@ class PlyFileReader:
         match tokens[0]:
             case 'ply':
                 return
+            case 'comment':
+                return
             case 'format':
                 if tokens[1] != 'ascii':
                     raise ValueError(f"Unknown file format {line}")
