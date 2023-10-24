@@ -1,8 +1,8 @@
 from pathlib import Path
 from unittest import TestCase
 
-from topoutils.constants import MODELS_DIR
-from topoutils.obj_reader import ObjFileReader
+from outdoorar.constants import MODELS_DIR
+from outdoorar.obj_reader import ObjFileReader
 
 
 class TestObjReader(TestCase):

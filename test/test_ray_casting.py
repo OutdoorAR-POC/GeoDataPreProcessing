@@ -1,11 +1,10 @@
-from pathlib import Path
 from unittest import TestCase
 
 import numpy as np
-
-from topoutils import ray_casting, sphere_sampling
-from topoutils.obj_reader import ObjFileReader
-from topoutils.ray_casting import Triangle
+from outdoorar import ray_casting, sphere_sampling
+from outdoorar.constants import MODELS_DIR
+from outdoorar.obj_reader import ObjFileReader
+from outdoorar.ray_casting import Triangle
 
 
 class TestRayCasting(TestCase):
@@ -184,7 +183,7 @@ class TestRayCasting(TestCase):
     def test_cube2(self):
         point = np.array([1/2, 0, 1/2])
 
-        file_path = Path(__file__).resolve().parents[1].joinpath('models', 'cube.obj')
+        file_path = MODELS_DIR.joinpath('cube.obj')
         geometry = ObjFileReader(file_path).geometry
 
         N = 4

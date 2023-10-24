@@ -3,12 +3,12 @@ from dataclasses import asdict
 
 import numpy as np
 
-from topoutils import sphere_sampling
-from topoutils.constants import MODELS_DIR, VISIBILITY_DIR, ANNOTATIONS_DIR
-from topoutils.obj_reader import ObjFileReader
-from topoutils.ply_reader import PlyFileReader
-from topoutils.ray_casting import Triangle
-from topoutils.visibility import Visibility, Vertex, Edge
+from outdoorar import sphere_sampling
+from outdoorar.constants import MODELS_DIR, VISIBILITY_DIR, ANNOTATIONS_DIR
+from outdoorar.obj_reader import ObjFileReader
+from outdoorar.ply_reader import PlyFileReader
+from outdoorar.ray_casting import Triangle
+from outdoorar.visibility import Visibility, Vertex, Edge
 
 model_file_path = MODELS_DIR.joinpath('decimatedMesh_closedHoles.obj')
 model_geometry = ObjFileReader(model_file_path).geometry

@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import numpy as np
 
-from topoutils import sphere_sampling
+from outdoorar import sphere_sampling
 
 
 class TestVisibilityMap(TestCase):

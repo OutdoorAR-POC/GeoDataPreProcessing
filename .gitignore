@@ -4,3 +4,4 @@ notebook/.ipynb_checkpoints
 /notebook/output/
 /output/
 /notebook/*.png
+__pycache__/

@@ -4,11 +4,11 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from topoutils.constants import RESOURCES_DIR, MODELS_DIR, CAMERAS_DIR, ANNOTATIONS_DIR
-from topoutils.obj_reader import ObjFileReader
-from topoutils.ply_reader import PlyFileReader
-from topoutils.ray_casting import Triangle
-from topoutils.rendering import get_image_coordinates, is_inside_image
+from outdoorar.constants import RESOURCES_DIR, MODELS_DIR, CAMERAS_DIR, ANNOTATIONS_DIR
+from outdoorar.obj_reader import ObjFileReader
+from outdoorar.ply_reader import PlyFileReader
+from outdoorar.ray_casting import Triangle
+from outdoorar.rendering import get_image_coordinates, is_inside_image
 
 cameras_sfm = CAMERAS_DIR.joinpath('cameras.sfm')
 cameras = json.load(cameras_sfm.open('r'))

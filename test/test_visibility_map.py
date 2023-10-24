@@ -3,20 +3,19 @@
 # Point B: centre of the cube's face
 # Calculate visibility maps for these two points.
 
-from pathlib import Path
 from unittest import TestCase
 
 import numpy as np
-
-from topoutils import sphere_sampling
-from topoutils.obj_reader import ObjFileReader
-from topoutils.ray_casting import Triangle
+from outdoorar import sphere_sampling
+from outdoorar.constants import MODELS_DIR
+from outdoorar.obj_reader import ObjFileReader
+from outdoorar.ray_casting import Triangle
 
 
 class TestVisibilityMap(TestCase):
 
     def setUp(self) -> None:
-        file_path = Path(__file__).parents[1].joinpath('models', 'cube.obj')
+        file_path = MODELS_DIR.joinpath('cube.obj')
         self.geometry = ObjFileReader(file_path).geometry
         self.points = np.array([
             [1, 1, 1],  # corner

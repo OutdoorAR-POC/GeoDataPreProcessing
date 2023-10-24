@@ -3,8 +3,8 @@ from unittest import TestCase
 import numpy as np
 import numpy.testing
 
-from topoutils.constants import ANNOTATIONS_DIR
-from topoutils.ply_reader import PlyFileReader
+from outdoorar.constants import ANNOTATIONS_DIR
+from outdoorar.ply_reader import PlyFileReader
 
 
 class TestPlyFileReader(TestCase):
