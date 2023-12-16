@@ -26,11 +26,11 @@ class TestVisibilityMap(TestCase):
             [-1, 1 / 2, 2],  # outside, diagonal to the middle of an edge
         ])
         self.N = 8
-        self.direction_vectors = sphere_sampling.get_cartesian_coordinates(self.N)
+        self.direction_vectors = sphere_sampling.get_cartesian_coordinates(self.N**2)
 
     def test_visibility_map(self):
         direction_vectors2 = sphere_sampling.get_cartesian_coordinates_from_spherical(
-            *sphere_sampling.get_equal_angle_spherical_coordinates(self.N)
+            *sphere_sampling.get_equal_angle_spherical_coordinates(self.N**2)
         )
         # assume infinite visibility
         # each point has its visibility map

@@ -137,7 +137,7 @@ class TestRayCasting(TestCase):
 
     def test_vector_plane_intersection_for_multiple_points(self):
         N = 3
-        direction_vectors = sphere_sampling.get_cartesian_coordinates(N)
+        direction_vectors = sphere_sampling.get_cartesian_coordinates(N**2)
         # direction_vectors is an array of shape (NxN, 3); here N = 3
         X = [0, 0, 0]
         Y = [1, 1, 0]
@@ -175,9 +175,9 @@ class TestRayCasting(TestCase):
     def test_vector_plane_intersection_for_multiple_points__assert_column_major_reshape(self):
         N = 3
         direction_vectors = sphere_sampling.get_cartesian_coordinates_from_spherical(
-            *sphere_sampling.get_equal_angle_spherical_coordinates(N)
+            *sphere_sampling.get_equal_angle_spherical_coordinates(N**2)
         )
-        direction_vectors_flat = sphere_sampling.get_cartesian_coordinates(N)
+        direction_vectors_flat = sphere_sampling.get_cartesian_coordinates(N**2)
         # direction_vectors is an array of shape (N, N, 3); here N = 3
         X = [0, 0, 0]
         Y = [1, 1, 0]
@@ -214,7 +214,7 @@ class TestRayCasting(TestCase):
         geometry = ObjFileReader(file_path).geometry
 
         N = 4
-        direction_vectors = sphere_sampling.get_cartesian_coordinates(N)
+        direction_vectors = sphere_sampling.get_cartesian_coordinates(N**2)
 
         triangle = Triangle(*[geometry.vertices[vertex_idx] for vertex_idx in geometry.faces[-1]])
         inside_triangle, squared_distances = triangle.does_ray_intersect(point, direction_vectors)

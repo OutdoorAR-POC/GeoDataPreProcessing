@@ -41,7 +41,11 @@ for annotations_file_path in ANNOTATIONS_DIR.iterdir():
         annotations_info.extend(info)
 
 images_index = [view['imgName'] for view in views.values()]
-results_df = pd.DataFrame(data=None, columns=pd.MultiIndex.from_tuples(annotations_info), index=images_index)
+results_df = pd.DataFrame(
+    data=None,
+    columns=pd.MultiIndex.from_tuples(annotations_info),
+    index=images_index,
+)
 results_df.columns.names = ['Polyline', 'VertexIdx']
 
 for pose_obj in tqdm(cameras['poses']):
@@ -69,6 +73,9 @@ for pose_obj in tqdm(cameras['poses']):
         intersects, distance = triangle.does_ray_intersect(camera_location, direction_vectors, 0)
         z_buffer = np.minimum(z_buffer, distance)
 
-    results_df.loc[img_name] = np.logical_and(z_buffer > distances, annotations_visible).astype(int)
+    results_df.loc[img_name] = np.logical_and(
+        z_buffer > distances,
+        annotations_visible,
+    ).astype(int)
 
 results_df.to_csv(RESOURCES_DIR.joinpath("ground_truth.csv"))
