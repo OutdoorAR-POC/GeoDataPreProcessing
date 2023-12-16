@@ -45,7 +45,7 @@ for N in n_range:
                         x=point_list[0],
                         y=point_list[1],
                         z=point_list[2],
-                        visibility_grid=visibility_maps[point_idx].ravel(order='F').tolist()
+                        visibility_grid=visibility_maps[point_idx].tolist()
                     )
                 )
 

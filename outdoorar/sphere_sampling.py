@@ -1,12 +1,40 @@
+from enum import Enum
+
 import matplotlib.pyplot as plt
 import numpy as np
 
 from outdoorar.constants import FIGURES_DIR
 
 
-def get_spherical_coordinates(n: int) -> tuple:
+class SamplingScheme(Enum):
+    EQUAL_ANGLE = 1
+    GOLDEN_SPIRAL = 2
+
+
+def get_golden_spiral_cartesian_coordinates(samples: int) -> np.ndarray:
+    points = np.zeros((samples, 3))
+    phi = np.pi * (np.sqrt(5.) - 1.)  # golden angle in radians
+
+    for i in range(samples):
+        y = 1 - (i / float(samples - 1)) * 2  # y goes from 1 to -1
+        radius = np.sqrt(1 - y * y)  # radius at y
+
+        theta = phi * i  # golden angle increment
+
+        x = np.cos(theta) * radius
+        z = np.sin(theta) * radius
+
+        points[i, 0] = x
+        points[i, 1] = y
+        points[i, 2] = z
+
+    return points
+
+
+def get_equal_angle_spherical_coordinates(n: int) -> tuple:
     if n <= 0:
         raise ValueError("Number of spherical coordinates must be positive")
+
     u_offset = 2 * np.pi / (2 * n)
     v_offset = np.pi / (2 * n)
     u = np.linspace(u_offset, 2 * np.pi - u_offset, n)
@@ -21,8 +49,16 @@ def get_cartesian_coordinates_from_spherical(u, v, r=1) -> np.ndarray:
     return np.dstack((x, y, z))
 
 
-def get_cartesian_coordinates(n: int) -> np.ndarray:
-    return get_cartesian_coordinates_from_spherical(*get_spherical_coordinates(n))
+def get_cartesian_coordinates(
+        n: int, sampling_scheme: SamplingScheme = SamplingScheme.EQUAL_ANGLE,
+) -> np.ndarray:
+    match sampling_scheme:
+        case SamplingScheme.EQUAL_ANGLE:
+            return get_cartesian_coordinates_from_spherical(
+                *get_equal_angle_spherical_coordinates(n)
+            ).reshape((n*n, 3), order='F')
+        case SamplingScheme.GOLDEN_SPIRAL:
+            return get_golden_spiral_cartesian_coordinates(n**2)
 
 
 def plot_sampling_scheme(n: int) -> None:
@@ -30,7 +66,7 @@ def plot_sampling_scheme(n: int) -> None:
     ax = fig.add_subplot(projection='3d')
 
     # Make points data
-    u, v = get_spherical_coordinates(n)
+    u, v = get_equal_angle_spherical_coordinates(n)
     coords = get_cartesian_coordinates_from_spherical(u, v, 1)
     x = coords[:, :, 0]
     y = coords[:, :, 1]
@@ -50,7 +86,7 @@ def plot_sampling_scheme(n: int) -> None:
 
 def plot_sampling_grid(n: int) -> None:
     plt.figure()
-    u, v = get_spherical_coordinates(n)
+    u, v = get_equal_angle_spherical_coordinates(n)
     U, V = np.meshgrid(u, v)
     plt.scatter(U, V)
     plt.title('Directional visibility map of a point as a grid')

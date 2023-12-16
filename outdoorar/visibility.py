@@ -6,7 +6,7 @@ from typing import List
 import numpy as np
 from dacite import from_dict
 
-from outdoorar.sphere_sampling import get_spherical_coordinates
+from outdoorar.sphere_sampling import get_equal_angle_spherical_coordinates
 
 
 @dataclass
@@ -37,7 +37,7 @@ def from_json(path_to_file: Path) -> Visibility:
 
 def calculate_visibility(vertices: list[Vertex], eye: list[float]) -> np.ndarray:
     n = int(np.sqrt(len(vertices[0].visibility_grid)))
-    u, v = get_spherical_coordinates(n)
+    u, v = get_equal_angle_spherical_coordinates(n)
     points = np.array([[v.x, v.y, v.z] for v in vertices])
     delta = eye - points
     R = np.sqrt(np.sum(np.square(delta), axis=1))

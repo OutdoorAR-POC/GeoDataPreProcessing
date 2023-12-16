@@ -1,4 +1,3 @@
-from pathlib import Path
 from unittest import TestCase
 
 from outdoorar.constants import MODELS_DIR
