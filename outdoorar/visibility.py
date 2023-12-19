@@ -1,5 +1,6 @@
 import json
 from dataclasses import dataclass, field
+from enum import Enum
 from pathlib import Path
 from typing import List
 
@@ -8,6 +9,11 @@ from dacite import from_dict
 
 from outdoorar import sphere_sampling
 from outdoorar.sphere_sampling import SamplingScheme
+
+
+class NearestNeighborSelector(Enum):
+    EQUAL_SPACING = 1
+    COSINE_DISTANCE = 2
 
 
 @dataclass
@@ -38,6 +44,28 @@ def from_json(path_to_file: Path) -> Visibility:
 
 def get_visibility_index(
     points_to_camera_vectors: np.ndarray,
+    points_to_camera_distances: np.ndarray,
+    samples: int,
+    sampling_scheme: SamplingScheme,
+    algorithm: NearestNeighborSelector,
+) -> np.ndarray:
+    match algorithm:
+        case NearestNeighborSelector.EQUAL_SPACING:
+            return get_visibility_index_equal_sampling(
+                points_to_camera_vectors,
+                points_to_camera_distances,
+                samples,
+            )
+        case NearestNeighborSelector.COSINE_DISTANCE:
+            return get_visibility_index_by_cosine_distance(
+                points_to_camera_vectors,
+                samples,
+                sampling_scheme,
+            )
+
+
+def get_visibility_index_by_cosine_distance(
+    points_to_camera_vectors: np.ndarray,
     samples: int,
     sampling_scheme: SamplingScheme,
 ) -> np.ndarray:
@@ -67,36 +95,21 @@ def get_visibility_index_equal_sampling(
     return poly_vis_idx.astype(int)
 
 
-def calculate_visibility_for_equal_angles(
-    vertices: list[Vertex],
-    eye: list[float],
-) -> np.ndarray:
-    points = vertices_to_points(vertices)
-    points_to_camera_vectors = eye - points
-    points_to_camera_distances = np.sqrt(np.sum(np.square(points_to_camera_vectors), axis=1))
-    poly_vis_idx = get_visibility_index_equal_sampling(
-        points_to_camera_vectors,
-        points_to_camera_distances,
-        len(vertices[0].visibility_grid),
-    )
-    nn_visibility = [
-        vertex.visibility_grid[int(vis_idx)] for vis_idx, vertex in zip(poly_vis_idx, vertices)
-    ]
-    return nn_visibility >= points_to_camera_distances
-
-
 def calculate_visibility(
     vertices: list[Vertex],
     eye: list[float],
     sampling_scheme: SamplingScheme,
+    algorithm: NearestNeighborSelector,
 ) -> np.ndarray:
     points = vertices_to_points(vertices)
     points_to_camera_vectors = eye - points
     points_to_camera_distances = np.sqrt(np.sum(np.square(points_to_camera_vectors), axis=1))
     poly_vis_idx = get_visibility_index(
         points_to_camera_vectors,
+        points_to_camera_distances,
         len(vertices[0].visibility_grid),
         sampling_scheme,
+        algorithm,
     )
     nn_visibility = [
         vertex.visibility_grid[vis_idx] for vis_idx, vertex in zip(poly_vis_idx.ravel(), vertices)

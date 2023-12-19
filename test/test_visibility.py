@@ -37,7 +37,7 @@ class TestVisibilityCalculation(TestCase):
         points_to_camera_vectors = self.eye - self.points
         points_to_camera_distances = np.sqrt(np.sum(np.square(points_to_camera_vectors), axis=1))
 
-        visibility1 = visibility.get_visibility_index(
+        visibility1 = visibility.get_visibility_index_by_cosine_distance(
             points_to_camera_vectors, self.samples, SamplingScheme.EQUAL_ANGLE
         )
         visibility2 = visibility.get_visibility_index_equal_sampling(
@@ -46,8 +46,16 @@ class TestVisibilityCalculation(TestCase):
         npt.assert_array_almost_equal(visibility1, visibility2)
 
     def test_calculate_visibility(self):
-        visibility1 = visibility.calculate_visibility_for_equal_angles(self.vertices, self.eye)
+        visibility1 = visibility.calculate_visibility(
+            self.vertices,
+            self.eye,
+            SamplingScheme.EQUAL_ANGLE,
+            visibility.NearestNeighborSelector.EQUAL_SPACING,
+        )
         visibility2 = visibility.calculate_visibility(
-            self.vertices, self.eye, SamplingScheme.EQUAL_ANGLE
+            self.vertices,
+            self.eye,
+            SamplingScheme.EQUAL_ANGLE,
+            visibility.NearestNeighborSelector.COSINE_DISTANCE,
         )
         npt.assert_array_almost_equal(visibility1, visibility2)
