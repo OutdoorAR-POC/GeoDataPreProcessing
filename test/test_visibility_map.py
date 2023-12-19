@@ -6,6 +6,8 @@
 from unittest import TestCase
 
 import numpy as np
+import numpy.testing as npt
+
 from outdoorar import sphere_sampling
 from outdoorar.constants import MODELS_DIR
 from outdoorar.obj_reader import ObjFileReader
@@ -24,13 +26,26 @@ class TestVisibilityMap(TestCase):
             [-1, 1 / 2, 2],  # outside, diagonal to the middle of an edge
         ])
         self.N = 8
-        self.direction_vectors = sphere_sampling.get_cartesian_coordinates(self.N)
+        self.direction_vectors = sphere_sampling.get_cartesian_coordinates(self.N**2)
 
     def test_visibility_map(self):
+        direction_vectors2 = sphere_sampling.get_cartesian_coordinates_from_spherical(
+            *sphere_sampling.get_equal_angle_spherical_coordinates(self.N**2)
+        )
         # assume infinite visibility
-        visibility_maps = np.ones((len(self.points), self.N, self.N)) * np.infty   # each point has its visibility map
+        # each point has its visibility map
+        visibility_maps = np.ones((len(self.points), self.N * self.N)) * np.infty
+        visibility_maps2 = np.ones((len(self.points), self.N, self.N)) * np.infty
+
         for face in self.geometry.faces:
             triangle = Triangle(*[self.geometry.vertices[vertex_idx] for vertex_idx in face])
             for point_idx, point in enumerate(self.points):
                 intersects, distance = triangle.does_ray_intersect(point, self.direction_vectors)
                 visibility_maps[point_idx] = np.min((visibility_maps[point_idx], distance))
+
+                intersects2, distance2 = triangle.does_ray_intersect(point, direction_vectors2)
+                visibility_maps2[point_idx] = np.min((visibility_maps2[point_idx], distance2))
+
+        visibility_maps2 = visibility_maps2.reshape(visibility_maps2.shape[:-2]+(-1,), order='F')
+
+        npt.assert_array_almost_equal(visibility_maps, visibility_maps2)

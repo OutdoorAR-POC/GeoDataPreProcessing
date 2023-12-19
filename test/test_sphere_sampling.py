@@ -9,7 +9,7 @@ class TestVisibilityMap(TestCase):
 
     def test_get_spherical_coordinates(self):
         try:
-            sphere_sampling.get_spherical_coordinates(-1)
+            sphere_sampling.get_equal_angle_spherical_coordinates(-1)
             self.fail("Should raise ValueError")
         except ValueError:
             pass
@@ -26,3 +26,7 @@ class TestVisibilityMap(TestCase):
             0.5  # cos(v)
         ])
         np.testing.assert_allclose(expected_result, coords[i, j, :])
+
+    def test_get_goldern_spiral_cartesian_coordinates(self):
+        coords = sphere_sampling.get_golden_spiral_cartesian_coordinates(25)
+        self.assertEqual((25, 3), coords.shape)

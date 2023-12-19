@@ -112,9 +112,15 @@ class Triangle:
             ray_vectors: np.ndarray,
             epsilon: float = 0.0001,
     ) -> tuple[bool | np.ndarray, float | np.ndarray]:
-        """This function returns squared distance between the given point and the intersection point of the ray vector
-        with the triangle. Square root is taken later, for comparison squared distance is fine, since square function
-        preserves monotonicity. """
+        """This function returns squared distance between the given point and the intersection
+        point of the ray vector with the triangle. Square root is taken later, for comparison
+        squared distance is fine, since square function preserves monotonicity.
+
+        :param point: annotated point
+        :param ray_vectors: directional vectors
+        :param epsilon: extrusion factor in the direction given by triangle normal
+        :return:
+        """
         squared_distances = np.ones(ray_vectors.shape[:-1]) * np.infty
         extruded_point = point + epsilon * self.normal
         intersecting_vector, does_intersect_plane = vector_plane_intersection(

@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 import numpy as np
+
 from outdoorar import ray_casting, sphere_sampling
 from outdoorar.constants import MODELS_DIR
 from outdoorar.obj_reader import ObjFileReader
@@ -135,25 +136,26 @@ class TestRayCasting(TestCase):
         np.testing.assert_array_equal(expected_distances, distance)
 
     def test_vector_plane_intersection_for_multiple_points(self):
-        direction_vectors = sphere_sampling.get_cartesian_coordinates(3)
-        # direction_vectors is an array of shape (N, N, 3); here N = 3
+        N = 3
+        direction_vectors = sphere_sampling.get_cartesian_coordinates(N**2)
+        # direction_vectors is an array of shape (NxN, 3); here N = 3
         X = [0, 0, 0]
         Y = [1, 1, 0]
         Z = [1, 0, 0]
         p0 = [1, 1, 1]
         normal = ray_casting.normal_of_a_triangle(X, Y, Z)
+        idx0 = 0
+        idx1 = N
+        idx2 = 2*N
         # let's take the first row
         intersection_point1, has_intersection1 = ray_casting.vector_plane_intersection(
-            X, normal, p0, direction_vectors[0, 0, :]
+            X, normal, p0, direction_vectors[idx0, :]
         )
         intersection_point2, has_intersection2 = ray_casting.vector_plane_intersection(
-            X, normal, p0, direction_vectors[0, 1, :]
+            X, normal, p0, direction_vectors[idx1, :]
         )
         intersection_point3, has_intersection3 = ray_casting.vector_plane_intersection(
-            X, normal, p0, direction_vectors[0, 2, :]
-        )
-        intersection_points_first_row, has_interesection_first_row = ray_casting.vector_plane_intersection(
-            X, normal, p0, direction_vectors[0]
+            X, normal, p0, direction_vectors[idx2, :]
         )
         intersection_points_all_matrix, has_interesection_all_matrix = ray_casting.vector_plane_intersection(
             X, normal, p0, direction_vectors
@@ -162,12 +164,37 @@ class TestRayCasting(TestCase):
         self.assertFalse(has_intersection1)
         self.assertFalse(has_intersection2)
         self.assertTrue(has_intersection3)
-        np.testing.assert_array_equal(np.array([False, False, True]), has_interesection_first_row)
-        np.testing.assert_array_equal(has_interesection_first_row, has_interesection_all_matrix[0])
-        np.testing.assert_allclose(intersection_point1, intersection_points_first_row[0])
-        np.testing.assert_allclose(intersection_point2, intersection_points_first_row[1])
-        np.testing.assert_allclose(intersection_point3, intersection_points_first_row[2])
-        np.testing.assert_allclose(intersection_points_all_matrix[0], intersection_points_first_row)
+        self.assertFalse(has_interesection_all_matrix[idx0])
+        self.assertFalse(has_interesection_all_matrix[idx1])
+        self.assertTrue(has_interesection_all_matrix[idx2])
+
+        np.testing.assert_allclose(intersection_point1, intersection_points_all_matrix[idx0])
+        np.testing.assert_allclose(intersection_point2, intersection_points_all_matrix[idx1])
+        np.testing.assert_allclose(intersection_point3, intersection_points_all_matrix[idx2])
+
+    def test_vector_plane_intersection_for_multiple_points__assert_column_major_reshape(self):
+        N = 3
+        direction_vectors = sphere_sampling.get_cartesian_coordinates_from_spherical(
+            *sphere_sampling.get_equal_angle_spherical_coordinates(N**2)
+        )
+        direction_vectors_flat = sphere_sampling.get_cartesian_coordinates(N**2)
+        # direction_vectors is an array of shape (N, N, 3); here N = 3
+        X = [0, 0, 0]
+        Y = [1, 1, 0]
+        Z = [1, 0, 0]
+        p0 = [1, 1, 1]
+        normal = ray_casting.normal_of_a_triangle(X, Y, Z)
+
+        for i in range(N):
+            for j in range(N):
+                intersection_point, has_intersection = ray_casting.vector_plane_intersection(
+                    X, normal, p0, direction_vectors[i, j, :]
+                )
+                intersection_point_flat, has_intersection_flat = ray_casting.vector_plane_intersection(
+                    X, normal, p0, direction_vectors_flat[j * N + i]
+                )
+                np.testing.assert_allclose(intersection_point, intersection_point_flat)
+                self.assertEqual(has_intersection, has_intersection_flat)
 
     def test_cube(self):
         triangle = Triangle([0., 0., 0.], [0., 1., 1.], [0., 1., 0.])
@@ -187,7 +214,7 @@ class TestRayCasting(TestCase):
         geometry = ObjFileReader(file_path).geometry
 
         N = 4
-        direction_vectors = sphere_sampling.get_cartesian_coordinates(N)
+        direction_vectors = sphere_sampling.get_cartesian_coordinates(N**2)
 
         triangle = Triangle(*[geometry.vertices[vertex_idx] for vertex_idx in geometry.faces[-1]])
         inside_triangle, squared_distances = triangle.does_ray_intersect(point, direction_vectors)
